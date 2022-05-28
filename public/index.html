@@ -21,20 +21,28 @@
             const previousWord = await response.text();
             const para = document.querySelector("#previousWord");
             para.innerText = `前の単語：${previousWord}`;
+            document.getElementById('list').innerText = "";
+            for (const val of historyWords.reverse()) {
+                var historyWordsList = document.createElement('li');
+                historyWordsList.textContent = val;
+                document.getElementById('list').appendChild(historyWordsList);
+            }
+
         };
         document.querySelector("#reset").onclick = async (event) => {
             document.getElementById("nextWordSendButton").style.visibility = '';
             document.getElementById("nextWordInput").style.visibility = '';
             document.getElementById("nextWordInput").value = '';
             historyWords = [];
-            let nextWord = "しりとり";
+            let nextWord = "";
             const response = await fetch("/reset", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ nextWord, historyWords })
             });
+
             const para = document.querySelector("#previousWord");
-            para.innerText = `しりとり`;
+            para.innerText = await response.text();
             return;
 
         }
@@ -62,6 +70,7 @@
                 alert(await response.text());
                 return;
             }
+            document.getElementById("nextWordInput").value = '';
             const previousWord = await response.text();
             const para = document.querySelector("#previousWord");
             historyWords.push(previousWord);

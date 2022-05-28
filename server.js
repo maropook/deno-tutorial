@@ -10,24 +10,22 @@ import {
 
 let previousWord = "しりとり";
 let myWords = [
-    "飛行機",
-    "船",
-    "汽車",
-    "車",
-    "自転車",
-    "川",
-    "山",
-    "道路",
-    "家",
-    "スクリプト",
+    "ひこうき",
+    "ふね",
+    "きしゃ",
+    "くるま",
+    "じてんしゃ",
+    "かわ",
+    "やま",
+    "どうろ",
+    "いえ",
+    "すくりぷと",
 ];
 
-function getRandamWord(n) {
-    for (let i = 0; i < 5; i++) {
-        let num = Math.floor(Math.random() * (myWords.length - n)) + n;
-        console.log(num);
-    }
-};
+function getRandam() {
+    return myWords[Math.floor(Math.random() * (myWords.length))];
+}
+
 console.log("Listening on http://localhost:8000");
 
 serve(async (req) => {
@@ -36,12 +34,14 @@ serve(async (req) => {
         return new Response(previousWord);
     }
     if (req.method === "POST" && pathname === "/reset") {
-        previousWord = "しりとり";
+        previousWord = getRandam();
         return new Response(previousWord);
     }
     if (req.method === "POST" && pathname === "/shiritori") {
+
         const requestJson = await req.json();
         console.log(requestJson)
+        console.log(getRandam())
         const nextWord = requestJson.nextWord;
         const historyWords = requestJson.historyWords;
         for (const val of historyWords) {
