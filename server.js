@@ -6,18 +6,7 @@ import {
     serveDir
 } from "https://deno.land/std@0.138.0/http/file_server.ts";
 
-// 「ん」が終わったらゲームを終了する
-// 最初の単語がランダムに決まるようにする
-// 同じ単語を入力できないようにする
-// ひらがな以外を入力できないようにする
-// しりとりの単語の履歴を表示する
-// 最初からやり直せるようにリセット機能をつける
-// 他のユーザーが単語を更新したら自動で自分のページの単語が切り替わるようにする
-// 複数のユーザーで対戦できるようにする
-// CSS でオシャレな見た目にする
-// Vue や React などのフレームワークを使う
-// サーバーを JavaScript ではなく TypeScript で作成する
-// データベースと連携する（※）
+
 
 let previousWord = "しりとり";
 let myWords = [
@@ -46,9 +35,22 @@ serve(async (req) => {
     if (req.method === "GET" && pathname === "/shiritori") {
         return new Response(previousWord);
     }
+    if (req.method === "POST" && pathname === "/reset") {
+        previousWord = "しりとり";
+        return new Response(previousWord);
+    }
     if (req.method === "POST" && pathname === "/shiritori") {
         const requestJson = await req.json();
+        console.log(requestJson)
         const nextWord = requestJson.nextWord;
+        const historyWords = requestJson.historyWords;
+        for (const val of historyWords) {
+            if (nextWord == val) {
+                return new Response("一度使った単語です", {
+                    status: 400
+                });
+            }
+        }
 
         if (
             nextWord.length > 0 &&
@@ -67,6 +69,7 @@ serve(async (req) => {
         }
 
         previousWord = nextWord;
+
         return new Response(previousWord);
     }
 

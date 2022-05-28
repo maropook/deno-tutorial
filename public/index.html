@@ -11,34 +11,72 @@
     <p id="previousWord"></p>
     <input id="nextWordInput" type="text" />
     <button id="nextWordSendButton">送信</button>
+    <button id="reset">リセット</button>
+    <ul id="list">
+    </ul>
     <script type="module">
-
+        let historyWords = [];
         window.onload = async (event) => {
             const response = await fetch("/shiritori");
             const previousWord = await response.text();
             const para = document.querySelector("#previousWord");
             para.innerText = `前の単語：${previousWord}`;
-
         };
+        document.querySelector("#reset").onclick = async (event) => {
+            document.getElementById("nextWordSendButton").style.visibility = '';
+            document.getElementById("nextWordInput").style.visibility = '';
+            document.getElementById("nextWordInput").value = '';
+            historyWords = [];
+            let nextWord = "しりとり";
+            const response = await fetch("/reset", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nextWord, historyWords })
+            });
+            const para = document.querySelector("#previousWord");
+            para.innerText = `しりとり`;
+            return;
 
-
+        }
         document.querySelector("#nextWordSendButton").onclick = async (event) => {
-            const nextWord = document.querySelector("#nextWordInput").value;
+            let nextWord = document.querySelector("#nextWordInput").value;
+            if (!/^[ぁ-んー]*$/.test(nextWord)) {
+                alert(await "ひらがなのみ入力してください");
+                return;
+            }
+            if (nextWord.charAt(nextWord.length - 1) === "ん") {
+                alert(await "んがついたら負けです");
+                document.getElementById("nextWordSendButton").style.visibility = 'hidden';
+                document.getElementById("nextWordInput").style.visibility = 'hidden';
+                const para = document.querySelector("#previousWord");
+                para.innerText = `んがついたので負けです`;
+                return;
+            }
             const response = await fetch("/shiritori", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ nextWord })
+                body: JSON.stringify({ nextWord, historyWords })
             });
+
             if (response.status / 100 !== 2) {
                 alert(await response.text());
                 return;
             }
-
             const previousWord = await response.text();
             const para = document.querySelector("#previousWord");
+            historyWords.push(previousWord);
             para.innerText = `前の単語：${previousWord}`;
 
+            document.getElementById('list').innerText = "";
+            for (const val of historyWords.reverse()) {
+                var historyWordsList = document.createElement('li');
+                historyWordsList.textContent = val;
+                document.getElementById('list').appendChild(historyWordsList);
+            }
+
+
         };
+
 
     </script>
 
