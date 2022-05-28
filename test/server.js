@@ -58,10 +58,11 @@ serve(async (req) => {
                 status: 400
             });
         }
+
         if (
-            nextWord.charAt(nextWord.length - 1) === "ん"
+            previousWord.charAt(nextWord.length - 1) !== nextWord.charAt(0)
         ) {
-            return new Response("んがついたら負けです", {
+            return new Response("前の単語に続いていません。", {
                 status: 400
             });
         }
@@ -69,8 +70,6 @@ serve(async (req) => {
         previousWord = nextWord;
         return new Response(previousWord);
     }
-
-
 
 
     return serveDir(req, {

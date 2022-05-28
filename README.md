@@ -1,3 +1,7 @@
+https://maropook-deno-tutorial.deno.dev/:denoの公開
+
+https://github.com/maropook/deno-tutorial
+
 https://docs.google.com/forms/d/e/1FAIpQLSfu3Ute3bl4iCre7pMvoQsnGbCUq3H0CW2VfFeZPZtB9oa4og/viewform
 
 https://deno.land/#installation
