@@ -18,6 +18,9 @@
         </ul>
 
         <div>敗北者</div>
+        <p>　　時刻　　　　　　　　名前　　　コメント</p>
+        <ul id="loser-list">
+        </ul>
         <input id="nameInput" type="text" style="visibility:hidden;" />
         <input id="messageInput" type="text" style="visibility:hidden;" />
         <button id="loseWordSendButton" style="visibility:hidden;">送信</button>
@@ -37,16 +40,32 @@
             await updateHistory(historyWords);
 
         };
+        function updateLoserHistory (loserJson) {
+            document.getElementById('loser-list').innerText = "";
+            for (let key in loserJson) {
+                console.log(loserJson[key]);
+                var loserJsonList = document.createElement('li');
+                loserJsonList.textContent = loserJson[key].date + '　' + loserJson[key].name + '　' + loserJson[key].message;
+                document.getElementById('loser-list').appendChild(loserJsonList);
+            }
+        };
         window.addEventListener('DOMContentLoaded', function () {
             setInterval(async () => {
                 var shiritoriResponse = await fetch("/shiritori");
+                var loserResponse = await fetch("/loser");
+                var loserJson = await loserResponse.json();
+                console.log(loserJson);
+                for (let key in loserJson) {
+                    console.log(loserJson[key].message);
+                }
                 const previousWord = await getAndUpdatePreviousWord(shiritoriResponse);
                 var responseHistory = await fetch("/history");
                 var historyWordsJson = await responseHistory.text();
                 historyWords = historyWordsJson.split(",");
                 console.log(historyWords);
                 await updateHistory(historyWords);
-                console.log("Interval type3");
+                await updateLoserHistory(loserJson);
+
             }, 1000);
 
         });
@@ -60,8 +79,6 @@
             document.getElementById("nameInput").style.visibility = 'hidden';
             document.getElementById("messageInput").style.visibility = 'hidden';
             document.getElementById("loseWordSendButton").style.visibility = 'hidden';
-
-
             let name = document.querySelector("#nameInput").value;
             let message = document.querySelector("#messageInput").value;
             const response = await fetch("/lose", {
@@ -70,7 +87,6 @@
                 body: JSON.stringify({ name, message })
             });
             reset();
-
             return;
         }
         document.querySelector("#nextWordSendButton").onclick = async (event) => {
@@ -86,7 +102,6 @@
                 document.getElementById("nameInput").style.visibility = '';
                 document.getElementById("messageInput").style.visibility = '';
                 document.getElementById("loseWordSendButton").style.visibility = '';
-
                 const para = document.querySelector("#previousWord");
                 para.innerText = `んがついたので負けです`;
                 return;

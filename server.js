@@ -8,14 +8,12 @@ import {
 
 
 import {
-    deleteApp,
     initializeApp
 } from "https://www.gstatic.com/firebasejs/9.8.2/firebase-app.js";
 
 import {
     getDatabase,
     ref,
-    set,
     onValue,
     push
 } from "https://www.gstatic.com/firebasejs/9.8.2/firebase-database.js";
@@ -77,6 +75,14 @@ serve(async (req) => {
     }
     if (req.method === "GET" && pathname === "/history") {
         return new Response(historyWords);
+    }
+    if (req.method === "GET" && pathname === "/loser") {
+        const starCountRef = ref(database, 'loser');
+        let loserLists;
+        onValue(starCountRef, (snapshot) => {
+            loserLists = snapshot.val();
+        });
+        return new Response(JSON.stringify(loserLists));
     }
 
 
