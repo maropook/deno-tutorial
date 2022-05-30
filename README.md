@@ -1,3 +1,7 @@
+```shell
+$ deno run --allow-net --allow-read --watch server.js
+```
+
 https://maropook-deno-tutorial.deno.dev/
 
 

@@ -63,6 +63,9 @@ serve(async (req) => {
         return new Response('敗北者を書き込みました');
     }
     if (req.method === "GET" && pathname === "/shiritori") {
+        if (previousWord === "しりとり") {
+            previousWord = getRandam();
+        }
         console.log(historyWords)
         return new Response(previousWord);
     }
