@@ -7,48 +7,75 @@
 </head>
 
 <body>
-    <h1>しりとり</h1>
-    <p id="previousWord"></p>
-    <input id="nextWordInput" type="text" />
-    <button id="nextWordSendButton">送信</button>
-    <button id="reset">リセット</button>
-    <ul id="list">
-    </ul>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <div id="board">
+        <h2 class="board-title">しりとり</h2>
+        <p id="previousWord"></p>
+        <input id="nextWordInput" type="text" />
+        <button id="nextWordSendButton">送信</button>
+        <button id="reset">リセット</button>
+        <ul id="list">
+        </ul>
+
+        <div>敗北者</div>
+        <input id="nameInput" type="text" style="visibility:hidden;" />
+        <input id="messageInput" type="text" style="visibility:hidden;" />
+        <button id="loseWordSendButton" style="visibility:hidden;">送信</button>
+
+    </div>
+
     <script type="module">
         let historyWords = [];
+
         window.onload = async (event) => {
-            const response = await fetch("/shiritori");
-            const previousWord = await response.text();
-            const para = document.querySelector("#previousWord");
-            para.innerText = `前の単語：${previousWord}`;
-            document.getElementById('list').innerText = "";
-            for (const val of historyWords.reverse()) {
-                var historyWordsList = document.createElement('li');
-                historyWordsList.textContent = val;
-                document.getElementById('list').appendChild(historyWordsList);
-            }
+            var response = await fetch("/shiritori");
+            const previousWord = await getAndUpdatePreviousWord(response);
+            var responseHistory = await fetch("/history");
+            var historyWordsJson = await responseHistory.text();
+            historyWords = historyWordsJson.split(",");
+            console.log(historyWords);
+            await updateHistory(historyWords);
 
         };
-        document.querySelector("#reset").onclick = async (event) => {
-            document.getElementById("nextWordSendButton").style.visibility = '';
-            document.getElementById("nextWordInput").style.visibility = '';
-            document.getElementById("nextWordInput").value = '';
-            historyWords = [];
-            let nextWord = "";
-            const response = await fetch("/reset", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ nextWord, historyWords })
-            });
+        window.addEventListener('DOMContentLoaded', function () {
+            setInterval(async () => {
+                var shiritoriResponse = await fetch("/shiritori");
+                const previousWord = await getAndUpdatePreviousWord(shiritoriResponse);
+                var responseHistory = await fetch("/history");
+                var historyWordsJson = await responseHistory.text();
+                historyWords = historyWordsJson.split(",");
+                console.log(historyWords);
+                await updateHistory(historyWords);
+                console.log("Interval type3");
+            }, 1000);
 
-            const para = document.querySelector("#previousWord");
-            para.innerText = await response.text();
+        });
+
+        document.querySelector("#reset").onclick = async (event) => {
+            reset();
             return;
 
         }
+        document.querySelector("#loseWordSendButton").onclick = async (event) => {
+            document.getElementById("nameInput").style.visibility = 'hidden';
+            document.getElementById("messageInput").style.visibility = 'hidden';
+            document.getElementById("loseWordSendButton").style.visibility = 'hidden';
+
+
+            let name = document.querySelector("#nameInput").value;
+            let message = document.querySelector("#messageInput").value;
+            const response = await fetch("/lose", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, message })
+            });
+            reset();
+
+            return;
+        }
         document.querySelector("#nextWordSendButton").onclick = async (event) => {
             let nextWord = document.querySelector("#nextWordInput").value;
-            if (!/^[ぁ-んー]*$/.test(nextWord)) {
+            if (!/^[ぁ-んー]*$/.test(nextWord) || document.getElementById("nextWordInput").value == '') {
                 alert(await "ひらがなのみ入力してください");
                 return;
             }
@@ -56,6 +83,10 @@
                 alert(await "んがついたら負けです");
                 document.getElementById("nextWordSendButton").style.visibility = 'hidden';
                 document.getElementById("nextWordInput").style.visibility = 'hidden';
+                document.getElementById("nameInput").style.visibility = '';
+                document.getElementById("messageInput").style.visibility = '';
+                document.getElementById("loseWordSendButton").style.visibility = '';
+
                 const para = document.querySelector("#previousWord");
                 para.innerText = `んがついたので負けです`;
                 return;
@@ -71,22 +102,47 @@
                 return;
             }
             document.getElementById("nextWordInput").value = '';
-            const previousWord = await response.text();
-            const para = document.querySelector("#previousWord");
+            const previousWord = await getAndUpdatePreviousWord(response);
             historyWords.push(previousWord);
-            para.innerText = `前の単語：${previousWord}`;
-
-            document.getElementById('list').innerText = "";
-            for (const val of historyWords.reverse()) {
-                var historyWordsList = document.createElement('li');
-                historyWordsList.textContent = val;
-                document.getElementById('list').appendChild(historyWordsList);
-            }
-
+            await updateHistory(historyWords);
 
         };
+        async function getAndUpdatePreviousWord (response) {
+            const previousWord = await response.text();
+            const para = document.querySelector("#previousWord");
+            para.innerText = `前の単語：${previousWord}`;
+            return previousWord
+        }
+        function updateHistory (historyWords) {
+            if (historyWords.length) {
+                document.getElementById('list').innerText = "";
+            }
+            for (const val of historyWords.reverse()) {
+                if (val != "") {
+                    var historyWordsList = document.createElement('li');
+                    historyWordsList.textContent = val;
+                    document.getElementById('list').appendChild(historyWordsList);
+                }
+            };
+            historyWords.reverse();
+        };
+        async function reset () {
+            document.getElementById("nextWordSendButton").style.visibility = '';
+            document.getElementById("nextWordInput").style.visibility = '';
+            document.getElementById("nextWordInput").value = '';
+            document.getElementById('list').innerText = "";
+            historyWords = [];
+            let nextWord = "";
+            const response = await fetch("/reset", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nextWord, historyWords })
+            });
+            const previousWord = await getAndUpdatePreviousWord(response);
+            historyWords.push(previousWord);
+            await updateHistory(historyWords);
 
-
+        }
     </script>
 
 </body>
