@@ -18,10 +18,8 @@ import {
     push
 } from "https://www.gstatic.com/firebasejs/9.8.2/firebase-database.js";
 
-
 let previousWord = "しりとり";
 let historyWords = [];
-
 let myWords = [
     "ひこうき",
     "ふね",
@@ -38,8 +36,6 @@ let myWords = [
 function getRandam() {
     return myWords[Math.floor(Math.random() * (myWords.length))];
 }
-
-console.log("Listening on http://localhost:8000");
 
 serve(async (req) => {
     const firebaseConfig = {
@@ -58,17 +54,14 @@ serve(async (req) => {
 
     if (req.method === "POST" && pathname === "/lose") {
         const now = new Date();
-
         const requestJson = await req.json();
         push(ref(database, 'loser'), {
             name: requestJson.name,
             message: requestJson.message,
             date: now.getMonth() + 1 + '月' + now.getDate() + '日' + now.getHours() + '時' + now.getMinutes() + '分'
         });
-
         return new Response('敗北者を書き込みました');
     }
-
     if (req.method === "GET" && pathname === "/shiritori") {
         console.log(historyWords)
         return new Response(previousWord);
@@ -84,8 +77,6 @@ serve(async (req) => {
         });
         return new Response(JSON.stringify(loserLists));
     }
-
-
     if (req.method === "POST" && pathname === "/reset") {
         previousWord = getRandam();
 
@@ -94,7 +85,6 @@ serve(async (req) => {
         historyWords.push(previousWord)
         return new Response(previousWord);
     }
-
     if (req.method === "POST" && pathname === "/shiritori") {
 
         const requestJson = await req.json();
@@ -109,7 +99,6 @@ serve(async (req) => {
                 });
             }
         }
-
         if (
             nextWord.length > 0 &&
             previousWord.charAt(previousWord.length - 1) !== nextWord.charAt(0)
@@ -127,18 +116,12 @@ serve(async (req) => {
         }
         historyWords.push(nextWord)
         previousWord = nextWord;
-
         return new Response(previousWord);
     }
-
-
-
-
     return serveDir(req, {
         fsRoot: "public",
         urlRoot: "",
         showDirListing: true,
         enableCors: true,
     });
-
 });
