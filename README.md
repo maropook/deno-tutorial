@@ -2,10 +2,9 @@
 $ deno run --allow-net --allow-read --watch server.js
 ```
 
+:denoの公開
 https://maropook-deno-tutorial.deno.dev/
 
-
-:denoの公開
 
 https://github.com/maropook/deno-tutorial
 
