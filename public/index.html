@@ -18,11 +18,13 @@
         </ul>
 
         <div>敗北者</div>
-        <p>　　時刻　　　　　　　　名前　　　コメント</p>
+        <span>　　時刻　　　　　　　　名前　　　コメント</span>
         <ul id="loser-list">
         </ul>
+        <div id="loseInputLabel" style="visibility:hidden;">　　名前　　　コメント</div>
         <input id="nameInput" type="text" style="visibility:hidden;" />
         <input id="messageInput" type="text" style="visibility:hidden;" />
+
         <button id="loseWordSendButton" style="visibility:hidden;">送信</button>
 
     </div>
@@ -79,6 +81,8 @@
             document.getElementById("nameInput").style.visibility = 'hidden';
             document.getElementById("messageInput").style.visibility = 'hidden';
             document.getElementById("loseWordSendButton").style.visibility = 'hidden';
+            document.getElementById("loseInputLabel").style.visibility = 'hidden';
+            document.getElementById("reset").style.visibility = '';
             let name = document.querySelector("#nameInput").value;
             let message = document.querySelector("#messageInput").value;
             const response = await fetch("/lose", {
@@ -99,9 +103,13 @@
                 alert(await "んがついたら負けです");
                 document.getElementById("nextWordSendButton").style.visibility = 'hidden';
                 document.getElementById("nextWordInput").style.visibility = 'hidden';
+                document.getElementById("reset").style.visibility = 'hidden';
                 document.getElementById("nameInput").style.visibility = '';
                 document.getElementById("messageInput").style.visibility = '';
                 document.getElementById("loseWordSendButton").style.visibility = '';
+                document.getElementById("loseInputLabel").style.visibility = '';
+                document.getElementById("nameInput").value = '';
+                document.getElementById("messageInput").value = '';
                 const para = document.querySelector("#previousWord");
                 para.innerText = `んがついたので負けです`;
                 return;
